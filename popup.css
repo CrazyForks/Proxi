@@ -16,6 +16,9 @@ main { padding: 8px; }
 .edit.saving { background: #dff5e8; color: #208a50; }
 .edit.saving:hover { background: #c9eed8; }
 .edit svg { width: 16px; height: 16px; fill: currentColor; }
+.edit .save-icon { display: none; }
+.edit.saving .edit-icon { display: none; }
+.edit.saving .save-icon { display: block; }
 .proxy-panel { display: none; margin-top: 6px; padding: 8px; border: 1px solid #e1e5ee; border-radius: 9px; background: white; }
 .proxy-panel.visible { display: block; }
 .row { display: grid; grid-template-columns: 76px 1fr 60px; gap: 5px; }

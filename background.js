@@ -41,25 +41,29 @@ function proxyConfig(mode, proxySettings) {
   };
 }
 
-async function applyMode(mode, proxySettings) {
+async function applyMode(mode, proxySettings, persist = true) {
   mode = validMode(mode);
   await chrome.proxy.settings.set({
     value: proxyConfig(mode, proxySettings),
     scope: "regular"
   });
-  await chrome.storage.local.set({ mode, proxySettings });
-  await chrome.action.setIcon({ path: iconPaths(mode) });
+
+  const tasks = [chrome.action.setIcon({ path: iconPaths(mode) })];
+  if (persist) tasks.push(chrome.storage.local.set({ mode, proxySettings }));
+  await Promise.all(tasks);
 }
 
-async function initialize() {
+async function initialize(persist) {
   const saved = await chrome.storage.local.get(DEFAULTS);
-  const mode = saved.mode;
-  const proxySettings = saved.proxySettings;
-  await applyMode(mode, proxySettings);
+  await applyMode(saved.mode, saved.proxySettings, persist);
 }
 
-chrome.runtime.onInstalled.addListener(initialize);
-chrome.runtime.onStartup.addListener(initialize);
+chrome.runtime.onInstalled.addListener(({ reason }) => {
+  initialize(reason === "install").catch(console.error);
+});
+chrome.runtime.onStartup.addListener(() => {
+  initialize(false).catch(console.error);
+});
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message?.type !== "applyProxy") return false;
